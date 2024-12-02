@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+lancedb
+pyarrow
+sentence-transformers
+langchain
+langchain-community==0.3.5
+openai
