@@ -19,6 +19,22 @@ logging.basicConfig(level=logging.INFO)
 #    - Add `original_text` as a string field to store the raw document content.
 # ```
 
+# Initialize the SentenceTransformer model
+model = SentenceTransformer('all-MiniLM-L6-v2')
+
+# Connect to LanceDB
+db = lancedb.connect("lance_db")
+
+# Define the embedding dimensions
+embedding_dim = 384
+
+# Define the schema for the embeddings table
+schema = pa.schema([
+    pa.field("text_id", pa.string()),
+    pa.field("vector", pa.list_(pa.float32()), nullable=False),
+    pa.field("original_text", pa.string())
+])
+
 # **TODO 2**: Initialize LanceDB by creating an embeddings table if it doesn’t exist, or opening the existing table. Configure the table to store `text_id`, `vector`, and `original_text` fields using the specified schema.
 # ```plaintext
 # pseudocode:
@@ -34,6 +50,16 @@ logging.basicConfig(level=logging.INFO)
 #     - Open the existing "embeddings" table for use.
 # ```
 
+# Check if the "embeddings" table exists in LanceDB
+if "embeddings" not in db:
+    # Create a new table named "embeddings" with the specified schema
+    db.create_table("embeddings", schema)
+    logging.info("Created table 'embeddings'")
+else:
+    # Open the existing "embeddings" table
+    table = db["embeddings"]
+    logging.info("Opened table 'embeddings'")
+
 # Create an index for vector search (only if table is not empty)
 try:
     # **TODO 3**: Create an index on the `vector` field to enhance the speed of vector-based searches, which are crucial for efficiently retrieving similar documents. Perform this step only if the table contains data, ensuring optimized retrieval for LangChain’s pipeline.
@@ -47,5 +73,10 @@ try:
     #         a. Log a message indicating that index creation is skipped because there is no data.
     # 2. Handle any exceptions during index creation, and if an error occurs, log a warning message with details about the issue.
     # ```
+    if len(table) > 0:
+        # Create an index on the `vector` field for efficient similarity searches
+        table.create_index("vector", "IVF_FLAT", 10)
+    else:
+        logging.info("Skipping index creation as the table is empty")
 except Exception as e:
     logging.warning(f"Could not create index: {str(e)}")
