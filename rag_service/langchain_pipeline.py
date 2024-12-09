@@ -11,6 +11,15 @@ from langchain.prompts import PromptTemplate
 #     - Format the template to place the query at the top, followed by "Contextual Info:" and the context content on a new line.
 # ```
 
+# Initialize the SentenceTransformer model
+model = SentenceTransformer('all-MiniLM-L6-v2')
+
+# Define a prompt template for enhancing user queries
+prompt_template = PromptTemplate(
+    query_placeholder="{query}",
+    context_placeholder="Contextual Info:\n {context}"
+)
+
 class LangChainRetrievalPipeline:
     # **TODO 2**: Define the LangChain Retrieval Pipeline class to manage document retrieval and prompt enhancement for generating relevant responses from a language model.
     # ```plaintext
@@ -33,4 +42,42 @@ class LangChainRetrievalPipeline:
     #    - `llm_response`: The language model’s response to the enhanced prompt.
     #    - `documents_used`: Metadata of the documents retrieved, providing context for the LLM response.
     # ```
+    
+    def __init__(self, collection, llm_model):
+        self.collection = collection
+        self.llm_model = llm_model
+
+    def retrieve_and_enhance(self, query):
+        # Generate an embedding for the query
+        query_embedding = model.encode(query).tolist()
+
+        # Retrieve matching documents
+        retrieved_docs = self.collection.search(query_embedding, top_k=5)
+
+        # Extract relevant text snippets from each document
+        context_texts = ""
+        for doc in retrieved_docs:
+            context_texts += doc["original_text"][:200] + "..."  # Limit to 200 characters
+
+        # Format an enhanced prompt
+        enhanced_prompt = prompt_template.format(query=query, context=context_texts)
+
+        # Generate a response from the language model
+        llm_response = self.llm_model.generate_response(enhanced_prompt)
+
+        # Prepare document metadata
+        documents_used = []
+        for doc in retrieved_docs:
+            doc_metadata = {
+                "text_id": doc["text_id"],
+                "original_text": doc["original_text"],
+                "score": doc["score"]
+            }
+            documents_used.append(doc_metadata) # Add metadata to the list
+
+        return {
+            "enhanced_prompt": enhanced_prompt,
+            "llm_response": llm_response,
+            "documents_used": documents_used
+        }
     
