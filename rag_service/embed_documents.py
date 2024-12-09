@@ -4,7 +4,7 @@ import json
 import requests
 from sentence_transformers import SentenceTransformer
 import logging
-from .db_config import collection, model
+from db_config import collection, model
 
 
 # Ensure logging is set up

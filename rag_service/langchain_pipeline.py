@@ -14,10 +14,15 @@ from langchain.prompts import PromptTemplate
 # Initialize the SentenceTransformer model
 model = SentenceTransformer('all-MiniLM-L6-v2')
 
+template = """
+   {query}
+   Contextual Info: {context}
+"""
+
 # Define a prompt template for enhancing user queries
 prompt_template = PromptTemplate(
-    query_placeholder="{query}",
-    context_placeholder="Contextual Info:\n {context}"
+   input_variables=["query", "context"],
+   template=template
 )
 
 class LangChainRetrievalPipeline:

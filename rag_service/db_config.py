@@ -53,11 +53,11 @@ schema = pa.schema([
 # Check if the "embeddings" table exists in LanceDB
 if "embeddings" not in db:
     # Create a new table named "embeddings" with the specified schema
-    db.create_table("embeddings", schema)
+    collection = db.create_table("embeddings", schema=schema)
     logging.info("Created table 'embeddings'")
 else:
     # Open the existing "embeddings" table
-    table = db["embeddings"]
+    collection = db["embeddings"]
     logging.info("Opened table 'embeddings'")
 
 # Create an index for vector search (only if table is not empty)
@@ -73,9 +73,9 @@ try:
     #         a. Log a message indicating that index creation is skipped because there is no data.
     # 2. Handle any exceptions during index creation, and if an error occurs, log a warning message with details about the issue.
     # ```
-    if len(table) > 0:
+    if len(collection) > 0:
         # Create an index on the `vector` field for efficient similarity searches
-        table.create_index("vector", "IVF_FLAT", 10)
+        collection.create_index("vector", "IVF_FLAT", 10)
     else:
         logging.info("Skipping index creation as the table is empty")
 except Exception as e:

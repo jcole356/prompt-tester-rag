@@ -4,9 +4,9 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List, Dict, Any
 import logging
-from .db_config import collection, model
-from .langchain_pipeline import LangChainRetrievalPipeline
-from .embed_documents import process_documents
+from db_config import collection, model
+from langchain_pipeline import LangChainRetrievalPipeline
+from embed_documents import process_documents
 from langchain.llms import OpenAI
 
 
