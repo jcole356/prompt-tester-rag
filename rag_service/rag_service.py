@@ -77,6 +77,23 @@ def store_embedding(request: TextRequest):
 #    - Log errors and raise an HTTP 500 error with details to ensure troubleshooting and debugging are efficient.
 # ```
 
+def retrieve_and_enhance(query: str, api_key: str) -> EnhancedPromptResponse:
+    try:
+        # Initialize the Language Model
+        llm_model = OpenAI(api_key)
+
+        # Set Up Retrieval Pipeline
+        langchain_pipeline = LangChainRetrievalPipeline(collection, llm_model)
+
+        # Retrieve and Enhance Prompt
+        enhanced_prompt, llm_response, documents_used = langchain_pipeline.retrieve_and_enhance(query)
+
+        # Return Structured Response
+        return EnhancedPromptResponse(enhanced_prompt=enhanced_prompt, llm_response=llm_response, documents_used=documents_used)
+    except Exception as e:
+        logging.error(f"Error in retrieve_and_enhance: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.post("/embed_all_documents/")
 def embed_all_documents():
     process_documents()  # Call the function from embed_documents.py
