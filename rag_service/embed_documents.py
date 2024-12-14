@@ -11,7 +11,7 @@ from db_config import collection, model
 logging.basicConfig(level=logging.INFO)
 
 # Directory containing the HR documents
-base_dir = "generated_hr_docs"
+base_dir = "../generated_hr_docs"
 
 # API endpoint for storing embeddings
 store_endpoint = "http://127.0.0.1:8000/store/"
