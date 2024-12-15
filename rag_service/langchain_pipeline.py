@@ -57,11 +57,14 @@ class LangChainRetrievalPipeline:
         query_embedding = model.encode(query).tolist()
 
         # Retrieve matching documents
-        retrieved_docs = self.collection.search(query_embedding, top_k=5)
+        retrieved_docs = self.collection.search(query_embedding)
+
+        # Limit the results to the top 5
+        top_docs= retrieved_docs[:5]
 
         # Extract relevant text snippets from each document
         context_texts = ""
-        for doc in retrieved_docs:
+        for doc in top_docs:
             context_texts += doc["original_text"][:200] + "..."  # Limit to 200 characters
 
         # Format an enhanced prompt
