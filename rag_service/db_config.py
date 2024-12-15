@@ -31,7 +31,7 @@ embedding_dim = 384
 # Define the schema for the embeddings table
 schema = pa.schema([
     pa.field("text_id", pa.string()),
-    pa.field("vector", pa.list_(pa.float32()), nullable=False),
+    pa.field("vector", pa.list_(pa.float32(), embedding_dim), nullable=False),
     pa.field("original_text", pa.string())
 ])
 
@@ -74,6 +74,7 @@ try:
     # 2. Handle any exceptions during index creation, and if an error occurs, log a warning message with details about the issue.
     # ```
     if len(collection) > 0:
+        # TODO: this isn't quite right
         # Create an index on the `vector` field for efficient similarity searches
         collection.create_index("vector", "IVF_FLAT", 10)
     else:
