@@ -31,7 +31,7 @@ embedding_dim = 384
 # Define the schema for the embeddings table
 schema = pa.schema([
     pa.field("text_id", pa.string()),
-    pa.field("vector", pa.list_(pa.float32(), embedding_dim), nullable=False),
+    pa.field("vector", pa.list_(pa.float32(), embedding_dim)),
     pa.field("original_text", pa.string())
 ])
 
@@ -53,7 +53,11 @@ schema = pa.schema([
 # Check if the "embeddings" table exists in LanceDB
 if "embeddings" not in db:
     # Create a new table named "embeddings" with the specified schema
-    collection = db.create_table("embeddings", schema=schema)
+    collection = db.create_table(
+        "embeddings",
+        schema=schema,
+        mode="create"
+    )
     logging.info("Created table 'embeddings'")
 else:
     # Open the existing "embeddings" table
@@ -76,7 +80,11 @@ try:
     if len(collection) > 0:
         # TODO: this isn't quite right
         # Create an index on the `vector` field for efficient similarity searches
-        collection.create_index("vector", "IVF_FLAT", 10)
+        collection.create_index(
+            "vector",
+            index_type="IVF_FLAT",
+            num_partitions=10
+        )
     else:
         logging.info("Skipping index creation as the table is empty")
 except Exception as e:
