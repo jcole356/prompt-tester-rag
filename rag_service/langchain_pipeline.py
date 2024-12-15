@@ -75,11 +75,11 @@ class LangChainRetrievalPipeline:
 
         # Prepare document metadata
         documents_used = []
-        for doc in retrieved_docs:
+        for doc in top_docs:
             doc_metadata = {
                 "text_id": doc["text_id"],
-                "original_text": doc["original_text"],
-                "score": doc["score"]
+                "snippet": doc["original_text"][:200],
+                "score": doc.get("score", None)
             }
             documents_used.append(doc_metadata) # Add metadata to the list
 
