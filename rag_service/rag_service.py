@@ -1,5 +1,4 @@
 # rag_service.py
-import pyarrow as pa
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List, Dict, Any
@@ -7,7 +6,9 @@ import logging
 from db_config import collection, model
 from langchain_pipeline import LangChainRetrievalPipeline
 from embed_documents import process_documents
-from langchain.llms import OpenAI
+# From warning messages on application startup
+# from langchain.llms import OpenAI
+from langchain_community.llms import OpenAI
 
 
 
@@ -47,8 +48,11 @@ def store_embedding(request: TextRequest):
             "vector": embedding,
             "original_text": request.text
         }
+
         logging.info(f"Storing data in the collection: {data}")
+
         collection.add([data])  # Use add method with a list of dictionaries
+
         return {"status": "stored", "text_id": request.text}
     except Exception as e:
         logging.error(f"Error in store_embedding: {str(e)}")
@@ -77,16 +81,28 @@ def store_embedding(request: TextRequest):
 #    - Log errors and raise an HTTP 500 error with details to ensure troubleshooting and debugging are efficient.
 # ```
 
-def retrieve_and_enhance(query: str, api_key: str) -> EnhancedPromptResponse:
+@app.post("/enhanced_retrieve/")
+def retrieve_and_enhance(request: RetrievalRequest) -> EnhancedPromptResponse:
     try:
+        print('INITIALIZING OPEN AI')
+
         # Initialize the Language Model
-        llm_model = OpenAI(api_key)
+        llm_model = OpenAI(api_key=request.api_key)
+
+        print('LLM MODEL')
+        print(llm_model)
 
         # Set Up Retrieval Pipeline
         langchain_pipeline = LangChainRetrievalPipeline(collection, llm_model)
 
+        print('LANGCHAIN PIPELINE')
+        print(langchain_pipeline)
+
         # Retrieve and Enhance Prompt
-        enhanced_prompt, llm_response, documents_used = langchain_pipeline.retrieve_and_enhance(query)
+        enhanced_prompt, llm_response, documents_used = langchain_pipeline.retrieve_and_enhance(request.query)
+
+        print('LLM RESPONSE')
+        print(llm_response)
 
         # Return Structured Response
         return EnhancedPromptResponse(enhanced_prompt=enhanced_prompt, llm_response=llm_response, documents_used=documents_used)
