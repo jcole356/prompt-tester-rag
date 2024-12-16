@@ -17,7 +17,7 @@ The application uses RAG (Retrieval Augmented Generation) to query and existing 
 
 ### Prerequisites
 
-- Python 3.8 or higher
+- Python 3.12 (see .tool-versions for recommended version)
 - pip (Python package installer)
 
 ### Installation
